@@ -20,8 +20,8 @@
                                                                           action:@selector(refreshFeed:)];
   [[self navigationItem] setRightBarButtonItem:button];
   [button release], button = nil;
-	
-	NSError *error = nil;
+  
+  NSError *error = nil;
   [[self fetchedResultsController] performFetch:&error];
   ZAssert(error == nil, @"Failed to retrieve results: %@", [error localizedDescription]);
 }
@@ -29,10 +29,11 @@
 #pragma mark -
 #pragma mark Table view methods
 
-- (void)configureCell:(UITableViewCell*)cell atIndexPath:(NSIndexPath*)indexPath
+- (void)configureCell:(UITableViewCell*)cell 
+          atIndexPath:(NSIndexPath*)indexPath
 {
-	NSManagedObject *managedObject = [fetchedResultsController objectAtIndexPath:indexPath];
-	[[cell textLabel] setText:[[managedObject valueForKey:@"title"] description]];
+  NSManagedObject *managedObject = [fetchedResultsController objectAtIndexPath:indexPath];
+  [[cell textLabel] setText:[[managedObject valueForKey:@"title"] description]];
   [[cell detailTextLabel] setText:[[managedObject valueForKey:@"author"] description]];
 }
 
@@ -41,9 +42,11 @@
   return [[fetchedResultsController sections] count];
 }
 
-- (NSInteger)tableView:(UITableView*)tableView numberOfRowsInSection:(NSInteger)section 
+- (NSInteger)tableView:(UITableView*)tableView 
+ numberOfRowsInSection:(NSInteger)section 
 {
-	id <NSFetchedResultsSectionInfo> sectionInfo = [[fetchedResultsController sections] objectAtIndex:section];
+  id <NSFetchedResultsSectionInfo> sectionInfo = nil;
+  sectionInfo = [[fetchedResultsController sections] objectAtIndex:section];
   return [sectionInfo numberOfObjects];
 }
 
@@ -56,7 +59,7 @@
     [cell setAccessoryType:UITableViewCellAccessoryDisclosureIndicator];
   }
   
-	[self configureCell:cell atIndexPath:indexPath];
+  [self configureCell:cell atIndexPath:indexPath];
   
   return cell;
 }
@@ -113,29 +116,33 @@ forRowAtIndexPath:(NSIndexPath*)indexPath
 {
   if (fetchedResultsController) return fetchedResultsController;
   
-	NSFetchRequest *fetchRequest = [[NSFetchRequest alloc] init];
-	NSEntityDescription *entity = [NSEntityDescription entityForName:@"FeedItem" 
+  NSFetchRequest *fetchRequest = [[NSFetchRequest alloc] init];
+  NSEntityDescription *entity = [NSEntityDescription entityForName:@"FeedItem" 
                                             inManagedObjectContext:[self managedObjectContext]];
-	[fetchRequest setEntity:entity];
-	
-	[fetchRequest setFetchBatchSize:20];
-	
-	NSSortDescriptor *sortDescriptor = [[NSSortDescriptor alloc] initWithKey:@"pubDate" ascending:NO];
-	NSArray *sortDescriptors = [[NSArray alloc] initWithObjects:sortDescriptor, nil];
-	
-	[fetchRequest setSortDescriptors:sortDescriptors];
-	
-	fetchedResultsController = [[NSFetchedResultsController alloc] initWithFetchRequest:fetchRequest 
-                                                                 managedObjectContext:[self managedObjectContext] 
-                                                                   sectionNameKeyPath:nil 
-                                                                            cacheName:@"Root"];
-  [fetchedResultsController setDelegate:self];
-	
-	[fetchRequest release], fetchRequest = nil;
+  [fetchRequest setEntity:entity];
+  
+  [fetchRequest setFetchBatchSize:20];
+  
+  NSSortDescriptor *sortDescriptor = [[NSSortDescriptor alloc] initWithKey:@"pubDate" 
+                                                                 ascending:NO];
+  NSArray *sortDescriptors = [[NSArray alloc] initWithObjects:sortDescriptor, nil];
+  
+  [fetchRequest setSortDescriptors:sortDescriptors];
+  
+  NSFetchedResultsController *frc = nil;
+  frc = [[NSFetchedResultsController alloc] initWithFetchRequest:fetchRequest 
+                                            managedObjectContext:[self managedObjectContext] 
+                                              sectionNameKeyPath:nil 
+                                                       cacheName:@"Root"];
+  [frc setDelegate:self];
+  [self setFetchedResultsController:frc];
+  [frc release], frc = nil;
+  
+  [fetchRequest release], fetchRequest = nil;
   [sortDescriptor release], sortDescriptor = nil;
-	[sortDescriptors release], sortDescriptors = nil;
-	
-	return fetchedResultsController;
+  [sortDescriptors release], sortDescriptors = nil;
+  
+  return fetchedResultsController;
 }    
 
 - (void)controllerWillChangeContent:(NSFetchedResultsController*)controller 
@@ -198,8 +205,8 @@ forRowAtIndexPath:(NSIndexPath*)indexPath
 
 - (void)dealloc 
 {
-	[fetchedResultsController release];
-	[managedObjectContext release];
+  [fetchedResultsController release];
+  [managedObjectContext release];
   [super dealloc];
 }
 
